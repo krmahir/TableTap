@@ -1,0 +1,93 @@
+﻿@model OrderPad.Models.RestaurantDetails
+@{
+    ViewData["Title"] = "Restaurant Details";
+}
+
+<script>
+    const existingTableNumbers = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Table.Select(t => t.TableNumber)));
+
+    document.getElementById("tableNumber").addEventListener("input", function () {
+        const tableNumberInput = document.getElementById("tableNumber").value.trim();
+        const errorMessage = document.getElementById("tableNumberError");
+        const addButton = document.getElementById("addTableButton");
+
+        const isUnique = tableNumberInput && !existingTableNumbers.includes(tableNumberInput);
+
+        if (isUnique) {
+            errorMessage.style.display = "none";
+            addButton.disabled = false;
+            console.log("working")
+        } else {
+            errorMessage.style.display = "block";
+            addButton.disabled = true;
+        }
+    });
+</script>
+
+
+<h2 class="mt-3">@Model.Restaurant.Name</h2>
+
+<!-- Restaurant details content -->
+<table class="table table-striped">
+    <tr>
+        <th>Email</th>
+        <td>@Model.Restaurant.Email</td>
+    </tr>
+    <tr>
+        <th>Phone</th>
+        <td>@Model.Restaurant.Phone</td>
+    </tr>
+    <tr>
+        <th>Address</th>
+        <td>@Model.Restaurant.Address</td>
+    </tr>
+</table>
+
+<!-- Add New Table Form -->
+<h4>Add a New Table</h4>
+<form asp-action="AddTable" method="post">
+    <input type="hidden" name="restaurantId" value="@Model.Restaurant.ID" />
+    <div class="form-group">
+        <label for="tableNumber">Table Number</label>
+        <input type="text" id="tableNumber" name="tableNumber" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Add Table</button>
+</form>
+
+
+
+<hr />
+
+<!-- List of Existing Tables -->
+<h4>Existing Tables</h4>
+
+@if (Model.Table != null && Model.Table.Count > 0)
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Table Number</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var table in Model.Table)
+            {
+                <tr>
+                    <td>@table.TableNumber</td>
+                    <td>
+                        <!-- Action Buttons -->
+                        <a href="@Url.Action("FoodOrder", new { tableId = table.TableID })" class="btn btn-success">Food Order</a>
+                        <a href="@Url.Action("DrinksOrder", new { tableId = table.TableID })" class="btn btn-info">Drinks Order</a>
+                        <a href="@Url.Action("Payment", new { tableId = table.TableID })" class="btn btn-warning">Payment</a>
+                        <a href="@Url.Action("CloseOrder", new { tableId = table.TableID })" class="btn btn-danger">Close Order</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No tables added yet. Please add a table.</p>
+}
