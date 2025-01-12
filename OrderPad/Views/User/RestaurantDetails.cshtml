@@ -22,6 +22,31 @@
             addButton.disabled = true;
         }
     });
+
+    function openModal(element) {
+        var url = $(element).data('url');
+        var title = $(element).data('title');
+
+        // Set the modal title
+        $('#actionModalLabel').text(title);
+
+        // Show the modal
+        $('#actionModal').modal('show');
+
+        // Load the content via AJAX
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function (data) {
+                // Load the content into the modal body
+                $('#actionModal .modal-body').html(data);
+            },
+            error: function () {
+                // Handle errors
+                $('#actionModal .modal-body').html('<p class="text-danger">An error occurred while loading the content.</p>');
+            }
+        });
+    }
 </script>
 
 
@@ -60,6 +85,22 @@
 
 <!-- List of Existing Tables -->
 <h4>Existing Tables</h4>
+<div class="modal fade" id="actionModal" tabindex="-1" role="dialog" aria-labelledby="actionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <!-- Use modal-lg for larger modals -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="actionModalLabel">Modal Title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Content will be loaded here via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
 
 @if (Model.Table != null && Model.Table.Count > 0)
 {
@@ -77,9 +118,11 @@
                     <td>@table.TableNumber</td>
                     <td>
                         <!-- Action Buttons -->
-                        <a href="@Url.Action("FoodOrder", new { tableId = table.TableID })" class="btn btn-success">Food Order</a>
-                        <a href="@Url.Action("DrinksOrder", new { tableId = table.TableID })" class="btn btn-info">Drinks Order</a>
-                        <a href="@Url.Action("Payment", new { tableId = table.TableID })" class="btn btn-warning">Payment</a>
+                        <!-- Updated Buttons -->
+                        <a href="#" class="btn btn-success" data-url="@Url.Action("FoodOrder", new { tableId = table.TableID })" data-title="Food Order" onclick="openModal(this)">Food Order</a>
+                        <a href="#" class="btn btn-info" data-url="@Url.Action("DrinksOrder", new { tableId = table.TableID })" data-title="Drinks Order" onclick="openModal(this)">Drinks Order</a>
+                        <a href="#" class="btn btn-warning" data-url="@Url.Action("Payment", new { tableId = table.TableID })" data-title="Payment" onclick="openModal(this)">Payment</a>
+
                         <a href="@Url.Action("CloseOrder", new { tableId = table.TableID })" class="btn btn-danger">Close Order</a>
                     </td>
                 </tr>

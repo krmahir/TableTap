@@ -121,22 +121,43 @@ public class UserController : Controller
         return RedirectToAction("RestaurantDetails", new { id = restaurantId });
     }
 
-    [HttpPost]
-    public IActionResult AddFoodOrder()
-    {
-        
-
-        // Redirect back to the RestaurantDetails action
-        return RedirectToAction("RestaurantDetails", new { id = 2 });
-    }
-
-    // Add these methods to the UserController
-
     public IActionResult FoodOrder(int tableId)
     {
-        // Handle food order logic
-        return View();  // You can pass the tableId to this view if needed
+        // Fetch data needed for the view
+        var model = new Item
+        {
+            TableId = tableId,
+            // Other properties as needed
+        };
+
+        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            // Return partial view for AJAX requests
+            return PartialView("_FoodOrderPartial", model);
+        }
+
+        // Return full view for regular requests
+        return View(model);
     }
+
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult SubmitFoodOrder(Item model)
+    {
+        if (ModelState.IsValid)
+        {
+            // Process the order
+            // ...
+
+            // Optionally, return a success message or close the modal
+            return Json(new { success = true });
+        }
+
+        // If invalid, return the partial view with validation messages
+        return PartialView("_FoodOrderPartial", model);
+    }
+
 
     public IActionResult DrinksOrder(int tableId)
     {
